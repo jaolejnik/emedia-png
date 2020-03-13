@@ -1,11 +1,11 @@
 class Chunk:
-    def __init__(self, length, type, data, crc):
+    def __init__(self, length, type, crc):
         self.length = length
         self.type = type
-        self.data = data;
         self.crc = crc
 
-    def print_info(self):
+    def basic_info(self):
         print('-'*10)
         print("Type: {type}".format(type = self.type))
         print("Length: {length} bytes".format(length = self.length))
+        # print("CRC: ") #don't know how to print it properly YET
