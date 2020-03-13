@@ -1,5 +1,5 @@
 from chunks import Chunk
-
+from ihdr import Ihdr
 
 chunk_types = [b"IHDR", b"PLTE", b"IDAT", b"IEND"]
 found_chunks = []
@@ -16,6 +16,11 @@ for type in chunk_types: # for each type in a chunk type list
         data = None
         index += 4
         crc = byte_string[index:index+4].hex() # get it's CRC
+    elif type == "IHDR":
+        length = int(byte_string[index-4:index].replace(b"\x00", b"").hex(), 16)
+        index += 4
+        data = byte_string[index:index+length]
+        found_chunks.append(Ihdr(length, data))
     else:
         # get the length of the chunk's data in bytes, remove unnecesary ones,
         length = int(byte_string[index-4:index].replace(b"\x00", b"").hex(), 16)
@@ -23,9 +28,7 @@ for type in chunk_types: # for each type in a chunk type list
         data = byte_string[index:index+length] # get chunk's data (in bytes for now)
         index += length
         crc = byte_string[index:index+4].hex() # get chunk's CRC (in hex for now)
-    found_chunks.append(Chunk(length, type, data, crc))
+        found_chunks.append(Chunk(length, type, data, crc))
 
 for chunk in found_chunks:
-    if chunk.type == 'IHDR':
-        # print(chunk.data)
-        chunk.ihdr_analyse()
+    chunk.print_info()
