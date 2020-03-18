@@ -1,5 +1,6 @@
 from chunks import Chunk
 
+
 class IHDR(Chunk):
     def __init__(self, length, data, crc):
         super().__init__(length, "IHDR", crc)
