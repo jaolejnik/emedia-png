@@ -1,4 +1,16 @@
 from chunks import Chunk
+from const import DISPLAY_W
+
+
+def filter_method(argument):
+    switcher = {
+        0: "None",
+        1: "Sub",
+        2: "Up",
+        3: "Average",
+        4: "Paeth",
+    }
+    return switcher.get(argument, "Not found")
 
 
 class IHDR(Chunk):
@@ -8,10 +20,15 @@ class IHDR(Chunk):
 
     def print_info(self):
         self.basic_info()
-        print("Width: {width}\nHeight: {height}".format(width = self.width, height = self.height))
-        print("Bit depth: {bit_depth}\nColor type: {color_type}".format(bit_depth = self.bit_depth, color_type = self.color_type))
-        print("Filter method: {filter_method}".format(filter_method = self.filter_method))
-        print("Interlace method: {interlace_method}".format(interlace_method = self.interlace_method))
+        print(" ", end="")
+        print(" HEADER DATA ".center(DISPLAY_W-2, "-"))
+        print("> WIDTH:", self.width)
+        print("> HEIGHT:", self.height)
+        print("> BIT DEPTH:", self.bit_depth)
+        print("> COLOR TYPE:", self.color_type)
+        print("> FILTER METHOD:", self.filter_method)
+        print("> INTERLACE METHOD:", self.interlace_method)
+        print()
 
     def analyse(self, data):
         if self.length != 13:
@@ -26,13 +43,3 @@ class IHDR(Chunk):
                 self.interlace_method = "No interlace"
             else:
                 self.interlace_method = "Adam7 interlace"
-
-def filter_method(argument):
-    switcher = {
-        0: "None",
-        1: "Sub",
-        2: "Up",
-        3: "Average",
-        4: "Paeth",
-    }
-    return switcher.get(argument, "Not found")

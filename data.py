@@ -1,6 +1,5 @@
-KILO = 1000
-MEGA = 1000000
-GIGA = 1000000000
+from const import KILO, MEGA, GIGA, DISPLAY_W
+
 
 def check_ext(pathname):
     if pathname[-3:].lower() != "png":
@@ -11,6 +10,7 @@ def get_name(pathname):
     check_ext(pathname)
     return pathname[10:-4]
 
+
 def format_size(size_bytes):
     if size_bytes < KILO: return str(size_bytes) + " B"
     elif size_bytes < MEGA:
@@ -19,9 +19,9 @@ def format_size(size_bytes):
         return str(kilo) + ',' + str(bytes)[0] + " KB"
     elif size_bytes < GIGA:
         mega = size_bytes // MEGA
-        # kilo = round(size_bytes // KILO, -3)
         kilo = round((size_bytes % MEGA) // KILO,-2)
         return str(mega) + ',' + str(kilo)[0] + " MB"
+
 
 def load_data(pathname):
     name = get_name(pathname)
@@ -31,13 +31,15 @@ def load_data(pathname):
     size = len(byte_string)
     return name, size, byte_string
 
+
 def file_info(name, size):
-    print(" BASIC FILE INFO ".center(28,"="))
+    print(" BASIC FILE INFO ".center(DISPLAY_W, "="))
     print()
-    print("> NAME: ", name)
+    print("> NAME:", name)
     print("> EXTENSION: PNG", )
     print("> SIZE: {formatted} ({bytes} bytes)".format(formatted=format_size(size), bytes=size))
     print()
+
 
 def parse_data(byte_string, chunk_type):
     if chunk_type == b"IEND":
