@@ -8,6 +8,7 @@ class Chunk:
         self.crc = crc
 
     def basic_info(self):
+        print()
         print(" {type} CHUNK ".format(type=self.type).center(DISPLAY_W, "="))
         print(" ", end="")
         print(" BASIC INFO ".center(DISPLAY_W-2, "-"))

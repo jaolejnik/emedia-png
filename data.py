@@ -1,14 +1,7 @@
-from const import KILO, MEGA, GIGA, DISPLAY_W
-
-
-def check_ext(pathname):
-    if pathname[-3:].lower() != "png":
-        raise Exception("INCORRECT FILE FORMAT!\nThis program is strictly for analyzing PNG files.")
-
-
-def get_name(pathname):
-    check_ext(pathname)
-    return pathname[10:-4]
+from const import KILO, MEGA, GIGA, DISPLAY_W, CHUNKS
+from chunks import Chunk
+from ihdr import IHDR
+from plte import PLTE
 
 
 def format_size(size_bytes):
@@ -22,35 +15,84 @@ def format_size(size_bytes):
         kilo = round((size_bytes % MEGA) // KILO,-2)
         return str(mega) + ',' + str(kilo)[0] + " MB"
 
+# TODO
+# def chunk_switch(chunk_type, length, data, crc):
+#     switcher = {
+#     "IHDR": IHDR,
+#     "PLTE": PLTE,
+#     }
+#     return switcher.get(chunk_type, Chunk)(length, data, crc)
 
-def load_data(pathname):
-    name = get_name(pathname)
-    png_file = open(pathname, "rb") # open file in read bytes mode
-    byte_string = png_file.read() # read all of it's data bytes
-    png_file.close() # close file
-    size = len(byte_string)
-    return name, size, byte_string
+class FilePNG:
+    def __init__(self, pathname):
+        self.extension = "PNG"
+        self.chunks = {}
+        self.get_name(pathname)
+        self.load_data(pathname)
+        self.find_chunks()
+        self.init_chunks()
 
+    def check_ext(self, pathname):
+        if pathname[-3:].lower() != "png":
+            raise Exception("INCORRECT FILE FORMAT!\nThis program is strictly for analyzing PNG files.")
 
-def file_info(name, size):
-    print(" BASIC FILE INFO ".center(DISPLAY_W, "="))
-    print()
-    print("> NAME:", name)
-    print("> EXTENSION: PNG", )
-    print("> SIZE: {formatted} ({bytes} bytes)".format(formatted=format_size(size), bytes=size))
-    print()
+    def get_name(self, pathname):
+        self.check_ext(pathname)
+        self.name = pathname[10:-4]
 
+    def load_data(self, pathname):
+        png_file = open(pathname, "rb")
+        self.byte_data = png_file.read()
+        self.size = len(self.byte_data)
+        png_file.close()
 
-def parse_data(byte_string, chunk_type):
-    if chunk_type == b"IEND":
-        return 0, None, None
+    def print_info(self):
+        print(" BASIC FILE INFO ".center(DISPLAY_W, "="))
+        print()
+        print("> NAME:", self.name)
+        print("> EXTENSION:", self.extension)
+        print("> SIZE: {formatted} ({bytes} bytes)".format(formatted=format_size(self.size), bytes=self.size))
+        print("> CHUNKS: ")
+        for key in self.chunks_indices.keys():
+            print("  ", end="")
+            print(" {} ".format(key).center(DISPLAY_W-4, "-"))
+            for chunk in self.chunks_indices[key].keys():
+                print("  * {}".format(chunk))
 
-    i = byte_string.find(chunk_type)
-    if i == -1:
-        raise Exception("Couldn't find {} chunk!".format(chunk_type))
-    length = int(byte_string[i-4:i].replace(b"\x00", b"").hex(), 16)
-    i += 4
-    data = byte_string[i:i+length]
-    i += length
-    crc = byte_string[i:i+4]
-    return length, data, crc
+    def find_chunks(self):
+        found_chunks = {"CRITICAL": {}, "ANCILLARY": {}}
+        i = 0
+        while self.byte_data[i:i+1]:
+            if 65 < self.byte_data[i] < 90 and self.byte_data[i:i+4] in CHUNKS:
+                type = self.byte_data[i:i+4].decode("utf-8")
+                found_chunks["CRITICAL"][type] = i
+                i += 4
+            elif 97 < self.byte_data[i] < 122 and self.byte_data[i:i+4] in CHUNKS:
+                type = self.byte_data[i:i+4].decode("utf-8")
+                found_chunks["ANCILLARY"][type] = i
+                i += 4
+            else:
+                i += 1
+        self.chunks_indices = found_chunks
+
+    def get_chunk_data(self, chunk_type, index):
+        if chunk_type == "IEND":
+            self.chunks["IEND"] = Chunk(0, "IEND", None)
+        else:
+            length = int(self.byte_data[index-4:index].replace(b"\x00", b"").hex(), 16)
+            index += 4
+            data = self.byte_data[index:index+length]
+            index += length
+            crc = self.byte_data[index:index+4]
+            if chunk_type == "IHDR":            # temporary solution -> switcher TODO
+                self.chunks[chunk_type] = IHDR(length, data, crc)
+            else:
+                self.chunks[chunk_type] = Chunk(length, chunk_type, crc)
+
+    def init_chunks(self):
+        for chunks_dict in self.chunks_indices.values():
+            for chunk in chunks_dict.keys():
+                self.get_chunk_data(chunk, chunks_dict[chunk])
+
+    def print_chunks(self):
+        for chunk in self.chunks.values(): chunk.basic_info()
