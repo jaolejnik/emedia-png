@@ -32,7 +32,8 @@ class IHDR(Chunk):
 
     def analyse(self, data):
         if self.length != 13:
-            print("IHDR chunk's length is invalid")
+            print(self.length)
+            raise Exception("IHDR chunk's length is invalid")
         else:
             self.width = int.from_bytes(data[0:4], byteorder = 'big')
             self.height = int.from_bytes(data[4:8], byteorder = 'big')

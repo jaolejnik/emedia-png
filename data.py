@@ -79,13 +79,15 @@ class FilePNG:
         if chunk_type == "IEND":
             self.chunks["IEND"] = Chunk(0, "IEND", None)
         else:
-            length = int(self.byte_data[index-4:index].replace(b"\x00", b"").hex(), 16)
+            length = int.from_bytes(self.byte_data[index-4:index], "big")
             index += 4
             data = self.byte_data[index:index+length]
             index += length
             crc = self.byte_data[index:index+4]
             if chunk_type == "IHDR":            # temporary solution -> switcher TODO
                 self.chunks[chunk_type] = IHDR(length, data, crc)
+            elif chunk_type == "PLTE":
+                self.chunks[chunk_type] = PLTE(length, data, crc, self.chunks["IHDR"].color_type)
             else:
                 self.chunks[chunk_type] = Chunk(length, chunk_type, crc)
 
@@ -96,3 +98,4 @@ class FilePNG:
 
     def print_chunks(self):
         for chunk in self.chunks.values(): chunk.basic_info()
+        self.chunks["PLTE"].plot_palettes()
