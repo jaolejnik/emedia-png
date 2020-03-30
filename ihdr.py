@@ -26,6 +26,7 @@ class IHDR(Chunk):
         print("> HEIGHT:", self.height)
         print("> BIT DEPTH:", self.bit_depth)
         print("> COLOR TYPE:", self.color_type)
+        print("> COMPRESSION METHOD:", self.compression_method)
         print("> FILTER METHOD:", self.filter_method)
         print("> INTERLACE METHOD:", self.interlace_method)
         print()
@@ -39,8 +40,9 @@ class IHDR(Chunk):
             self.height = int.from_bytes(data[4:8], byteorder = 'big')
             self.bit_depth = int.from_bytes(data[8:9], byteorder = 'big')
             self.color_type = int.from_bytes(data[9:10], byteorder = 'big')
-            self.filter_method = filter_method(int.from_bytes(data[10:11], byteorder = 'big'))
-            if int.from_bytes(data[11:12],byteorder = 'big') == 0:
+            self.compression_method = int.from_bytes(data[10:11], byteorder = 'big')
+            self.filter_method = filter_method(int.from_bytes(data[11:12], byteorder = 'big'))
+            if int.from_bytes(data[12:13],byteorder = 'big') == 0:
                 self.interlace_method = "No interlace"
             else:
                 self.interlace_method = "Adam7 interlace"

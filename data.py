@@ -2,6 +2,7 @@ from const import KILO, MEGA, GIGA, DISPLAY_W, CHUNKS
 from chunks import Chunk
 from ihdr import IHDR
 from plte import PLTE
+from idat import IDAT
 
 
 def format_size(size_bytes):
@@ -88,6 +89,8 @@ class FilePNG:
                 self.chunks[chunk_type] = IHDR(length, data, crc)
             elif chunk_type == "PLTE":
                 self.chunks[chunk_type] = PLTE(length, data, crc, self.chunks["IHDR"].color_type)
+            elif chunk_type == "IDAT":
+                self.chunks[chunk_type] = IDAT(length, data, crc, self.chunks["IHDR"].width, self.chunks["IHDR"].height, self.chunks["IHDR"].color_type)
             else:
                 self.chunks[chunk_type] = Chunk(length, chunk_type, crc)
 
@@ -98,4 +101,6 @@ class FilePNG:
 
     def print_chunks(self):
         for chunk in self.chunks.values(): chunk.basic_info()
-        self.chunks["PLTE"].plot_palettes()
+        # self.chunks["PLTE"].plot_palettes()
+        self.chunks["IHDR"].print_info()
+        self.chunks["IDAT"].check_correctness()
