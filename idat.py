@@ -8,24 +8,24 @@ def bytes_per_pixel(argument):
     switcher = {
         0: 1,
         2: 3,
-        3: 2,
+        3: 1,
         4: 2,
         6: 4,
     }
     return switcher.get(argument, "Not found")
 
 class IDAT(Chunk):
-    def __init__(self, length, data, crc, width, height, color_type):
+    def __init__(self, length, data, crc, width, height, color_type, palette = None):
         super().__init__(length, "IDAT", crc)
         self.data = data
         self.width = width
         self.height = height
+        self.color_type = color_type
         self.bytes_per_pixel = bytes_per_pixel(color_type)
         self.analyse()
 
     def analyse(self):
         self.data = zlib.decompress(self.data)
-        print(len(self.data))
         self.reconstructed_data = []
         stride = self.width * self.bytes_per_pixel
         i = 0
@@ -81,6 +81,10 @@ class IDAT(Chunk):
             return self.reconstructed_data[(r-1) * stride + c - self.bytes_per_pixel]
         else:
             return 0
+
+    def apply_palette(self, palette):
+        self.reconstructed_data = [pixel for pixel_i in self.reconstructed_data for pixel in palette[pixel_i]]
+        self.bytes_per_pixel = 3
 
     def print_info(self):
         self.basic_info()

@@ -26,11 +26,10 @@ def translate_RGB(rgb_tuple):
 class PLTE(Chunk):
     def __init__(self, length, data, crc, color_type):
         super().__init__(length, "PLTE", crc)
-        print(length/3)
+        # print(length/3)
         self.entries = length//3
         self.required = True if color_type == 3 else False
         self.palettes = [(data[i], data[i+1], data[i+2]) for i in range(0, self.length, 3)]
-        self.palettes.sort(key=lambda rgb: colorsys.rgb_to_yiq(*rgb))
 
     def plot_palettes(self):
         fig, ax = plt.subplots(1, 1)

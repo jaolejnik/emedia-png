@@ -103,4 +103,6 @@ class FilePNG:
         for chunk in self.chunks.values(): chunk.basic_info()
         # self.chunks["PLTE"].plot_palettes()
         self.chunks["IHDR"].print_info()
+        if self.chunks["IHDR"].color_type == 3:
+            self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
         self.chunks["IDAT"].check_correctness()
