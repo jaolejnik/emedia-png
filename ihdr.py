@@ -18,7 +18,7 @@ class IHDR(Chunk):
         super().__init__(length, "IHDR", crc)
         self.analyse(data)
 
-    def print_info(self):
+    def details(self):
         self.basic_info()
         print(" ", end="")
         print(" HEADER DATA ".center(DISPLAY_W-2, "-"))

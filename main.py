@@ -1,8 +1,4 @@
-from data import FilePNG
+from menu import Menu
 
-
-# pathname = input()
-pathname = "png_files/pokemon.png"
-png_file = FilePNG(pathname)
-png_file.print_info()
-png_file.print_chunks()
+test = Menu()
+test.start()

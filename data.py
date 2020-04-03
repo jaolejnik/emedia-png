@@ -32,6 +32,9 @@ class FilePNG:
         self.load_data(pathname)
         self.find_chunks()
         self.init_chunks()
+        if self.chunks["IHDR"].color_type == 3:
+            self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
+
 
     def check_ext(self, pathname):
         if pathname[-3:].lower() != "png":
@@ -59,6 +62,7 @@ class FilePNG:
             print(" {} ".format(key).center(DISPLAY_W-4, "-"))
             for chunk in self.chunks_indices[key].keys():
                 print("  * {}".format(chunk))
+        print()
 
     def find_chunks(self):
         found_chunks = {"CRITICAL": {}, "ANCILLARY": {}}
@@ -101,8 +105,9 @@ class FilePNG:
 
     def print_chunks(self):
         for chunk in self.chunks.values(): chunk.basic_info()
+        print()
         # self.chunks["PLTE"].plot_palettes()
-        self.chunks["IHDR"].print_info()
-        if self.chunks["IHDR"].color_type == 3:
-            self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
-        self.chunks["IDAT"].check_correctness()
+        # self.chunks["IHDR"].print_info()
+        # if self.chunks["IHDR"].color_type == 3:
+        #     self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
+        # self.chunks["IDAT"].check_correctness()

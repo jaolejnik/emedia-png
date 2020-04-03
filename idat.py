@@ -89,6 +89,6 @@ class IDAT(Chunk):
     def print_info(self):
         self.basic_info()
 
-    def check_correctness(self):
+    def details(self):
         plt.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width, self.bytes_per_pixel)))
         plt.show()
