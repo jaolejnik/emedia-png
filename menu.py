@@ -30,6 +30,7 @@ class Menu:
         print(" [1] - Print file's basic info.")
         print(" [2] - Print file's chunks.")
         print(" [3] - Go to chunks menu (for more details).")
+        print(" [4] - Print data without unimportant chunks to file")
         print(" [B] - Go back.")
         print(" [Q] - Quit\n")
 
@@ -49,7 +50,7 @@ class Menu:
 
     def load_file(self):
         # self.pathname = input(" Enter PNG file's pathname:\n  >>")
-        self.pathname = "png_files/smiley.png"
+        self.pathname = "png_files/dice.png"
         self.original_file = FilePNG(self.pathname)
 
 
@@ -84,6 +85,7 @@ class Menu:
         '1': self.original_file.print_info,
         '2': self.original_file.print_chunks,
         '3': chunks_menu,
+        '4': self.original_file.print_to_file,
         'b': go_back,
         'q': exit,
         }

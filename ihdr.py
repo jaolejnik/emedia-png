@@ -14,9 +14,10 @@ def filter_method(argument):
 
 
 class IHDR(Chunk):
-    def __init__(self, length, data, crc):
-        super().__init__(length, "IHDR", crc)
-        self.analyse(data)
+    def __init__(self, length, data, crc, byte_data):
+        super().__init__(length, "IHDR", crc, byte_data)
+        self.data = data
+        self.analyse(self.data)
 
     def details(self):
         self.basic_info()

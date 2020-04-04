@@ -1,11 +1,11 @@
 from const import DISPLAY_W
 
-
 class Chunk:
-    def __init__(self, length, type, crc):
+    def __init__(self, length, type, crc, byte_data):
         self.length = length
         self.type = type
         self.crc = crc
+        self.byte_data = byte_data
 
     def basic_info(self):
         print(" {type} CHUNK ".format(type=self.type).center(DISPLAY_W, "="))
