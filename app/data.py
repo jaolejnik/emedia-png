@@ -1,3 +1,5 @@
+import re
+
 from const import KILO, MEGA, GIGA, DISPLAY_W, CHUNKS
 from chunks import Chunk
 from ihdr import IHDR
@@ -16,13 +18,6 @@ def format_size(size_bytes):
         kilo = round((size_bytes % MEGA) // KILO,-2)
         return str(mega) + ',' + str(kilo)[0] + " MB"
 
-# TODO
-# def chunk_switch(chunk_type, length, data, crc):
-#     switcher = {
-#     "IHDR": IHDR,
-#     "PLTE": PLTE,
-#     }
-#     return switcher.get(chunk_type, Chunk)(length, data, crc)
 
 class FilePNG:
     def __init__(self, pathname):
@@ -35,19 +30,21 @@ class FilePNG:
         if self.chunks["IHDR"].color_type == 3:
             self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
 
-
     def check_ext(self, pathname):
-        if pathname[-3:].lower() != "png":
+        if pathname[-3:] != "png":
             raise Exception("INCORRECT FILE FORMAT!\nThis program is strictly for analyzing PNG files.")
 
     def get_name(self, pathname):
+        pathname = pathname.lower()
         self.check_ext(pathname)
-        self.name = pathname[10:-4]
+        fullname = re.findall('\w+.png', pathname)[0]
+        self.name = fullname[:-4]
 
     def load_data(self, pathname):
         png_file = open(pathname, "rb")
         self.byte_data = png_file.read()
         self.size = len(self.byte_data)
+        self.signature = self.byte_data[:8]
         png_file.close()
 
     def print_info(self):
@@ -70,37 +67,31 @@ class FilePNG:
         while self.byte_data[i:i+1]:
             if 65 < self.byte_data[i] < 90 and self.byte_data[i:i+4] in CHUNKS:
                 type = self.byte_data[i:i+4].decode("utf-8")
-                found_chunks["CRITICAL"][type] = i
+                found_chunks["CRITICAL"][type] = i-4
                 i += 4
             elif 97 < self.byte_data[i] < 122 and self.byte_data[i:i+4] in CHUNKS:
                 type = self.byte_data[i:i+4].decode("utf-8")
-                found_chunks["ANCILLARY"][type] = i
+                found_chunks["ANCILLARY"][type] = i-4
                 i += 4
             else:
                 i += 1
         self.chunks_indices = found_chunks
 
     def get_chunk_data(self, chunk_type, index):
-        if chunk_type == "IEND":
-            self.chunks["IEND"] = Chunk(0, "IEND", None, b'')
+        start = index
+        length = int.from_bytes(self.byte_data[start:start+4], "big")
+        end = index + length + 12
+        if chunk_type == "IHDR":
+            self.chunks[chunk_type] = IHDR(self.byte_data[start:end])
+        elif chunk_type == "PLTE":
+            self.chunks[chunk_type] = PLTE(self.byte_data[start:end], self.chunks["IHDR"].color_type)
+        elif chunk_type == "IDAT":
+            self.chunks[chunk_type] = IDAT(self.byte_data[start:end],
+                                           self.chunks["IHDR"].width,
+                                           self.chunks["IHDR"].height,
+                                           self.chunks["IHDR"].color_type)
         else:
-            chunk_byte_data = []
-            length = int.from_bytes(self.byte_data[index-4:index], "big")
-            chunk_byte_data.append(self.byte_data[index-4:index])
-            index += 4
-            data = self.byte_data[index:index+length]
-            index += length
-            crc = self.byte_data[index:index+4]
-            chunk_byte_data.append(data)
-            chunk_byte_data.append(crc)
-            if chunk_type == "IHDR":            # temporary solution -> switcher TODO
-                self.chunks[chunk_type] = IHDR(length, data, crc, chunk_byte_data)
-            elif chunk_type == "PLTE":
-                self.chunks[chunk_type] = PLTE(length, data, crc, chunk_byte_data, self.chunks["IHDR"].color_type)
-            elif chunk_type == "IDAT":
-                self.chunks[chunk_type] = IDAT(length, data, crc, chunk_byte_data, self.chunks["IHDR"].width, self.chunks["IHDR"].height, self.chunks["IHDR"].color_type)
-            else:
-                self.chunks[chunk_type] = Chunk(length, chunk_type, crc, chunk_byte_data)
+            self.chunks[chunk_type] = Chunk(self.byte_data[start:end])
 
     def init_chunks(self):
         for chunks_dict in self.chunks_indices.values():
@@ -109,16 +100,14 @@ class FilePNG:
 
     def print_chunks(self):
         for chunk in self.chunks.values(): chunk.basic_info()
-        print()
-        # self.chunks["PLTE"].plot_palettes()
-        # self.chunks["IHDR"].print_info()
-        # if self.chunks["IHDR"].color_type == 3:
-        #     self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
-        # self.chunks["IDAT"].check_correctness()
 
     def print_to_file(self):
-        tmp_png = open("png_files/tmp.png", "wb")
-        critical_chunks = ["IHDR", "PLTE", "IDAT"]
-        for chunk_key in self.chunks.keys():
-            if chunk_key in critical_chunks:
-                tmp_png.write(self.byte_data)
+        CRITICAL_CHUNKS = ["IHDR", "PLTE", "IDAT", "IEND"]
+        new_name = "../png_files/{}_crit.png".format(self.name)
+        tmp_png = open(new_name, "wb")
+        tmp_png.write(self.signature)
+        for chunk_type in CRITICAL_CHUNKS:
+            if chunk_type in self.chunks.keys():
+                tmp_png.write(self.chunks[chunk_type].raw_bytes)
+        print("> Saved the file with only critical chunks to: ", new_name)
+        print()

@@ -21,6 +21,7 @@ class Menu:
     def main_options():
         print("WHAT DO YOU WANT TO DO NEXT?\n")
         print(" [1] - Load PNG file.")
+        print()
         print(" [Q] - Quit\n")
 
 
@@ -31,6 +32,7 @@ class Menu:
         print(" [2] - Print file's chunks.")
         print(" [3] - Go to chunks menu (for more details).")
         print(" [4] - Print data without unimportant chunks to file")
+        print()
         print(" [B] - Go back.")
         print(" [Q] - Quit\n")
 
@@ -39,6 +41,7 @@ class Menu:
         print("WHAT DO YOU WANT TO DO NEXT?\n")
         for i,chunk in enumerate(self.original_file.chunks.keys(), 1):
             print(" [{}] - {} details.".format(i, chunk))
+        print()
         print(" [B] - Go back.")
         print(" [Q] - Quit\n")
 
@@ -50,8 +53,11 @@ class Menu:
 
     def load_file(self):
         # self.pathname = input(" Enter PNG file's pathname:\n  >>")
-        self.pathname = "png_files/dice.png"
+        self.pathname = "../png_files/smiley.png"
         self.original_file = FilePNG(self.pathname)
+        system("clear")
+        print("> LOADED FILE: {}.png".format(self.original_file.name))
+        print()
 
 
     def main_menu(self):

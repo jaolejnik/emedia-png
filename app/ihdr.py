@@ -14,10 +14,9 @@ def filter_method(argument):
 
 
 class IHDR(Chunk):
-    def __init__(self, length, data, crc, byte_data):
-        super().__init__(length, "IHDR", crc, byte_data)
-        self.data = data
-        self.analyse(self.data)
+    def __init__(self, raw_bytes):
+        super().__init__(raw_bytes)
+        self.analyse()
 
     def details(self):
         self.basic_info()
@@ -32,18 +31,18 @@ class IHDR(Chunk):
         print("> INTERLACE METHOD:", self.interlace_method)
         print()
 
-    def analyse(self, data):
+    def analyse(self):
         if self.length != 13:
             print(self.length)
             raise Exception("IHDR chunk's length is invalid")
         else:
-            self.width = int.from_bytes(data[0:4], byteorder = 'big')
-            self.height = int.from_bytes(data[4:8], byteorder = 'big')
-            self.bit_depth = int.from_bytes(data[8:9], byteorder = 'big')
-            self.color_type = int.from_bytes(data[9:10], byteorder = 'big')
-            self.compression_method = int.from_bytes(data[10:11], byteorder = 'big')
-            self.filter_method = filter_method(int.from_bytes(data[11:12], byteorder = 'big'))
-            if int.from_bytes(data[12:13],byteorder = 'big') == 0:
+            self.width = int.from_bytes(self.data[0:4], byteorder = 'big')
+            self.height = int.from_bytes(self.data[4:8], byteorder = 'big')
+            self.bit_depth = int.from_bytes(self.data[8:9], byteorder = 'big')
+            self.color_type = int.from_bytes(self.data[9:10], byteorder = 'big')
+            self.compression_method = int.from_bytes(self.data[10:11], byteorder = 'big')
+            self.filter_method = filter_method(int.from_bytes(self.data[11:12], byteorder = 'big'))
+            if int.from_bytes(self.data[12:13],byteorder = 'big') == 0:
                 self.interlace_method = "No interlace"
             else:
                 self.interlace_method = "Adam7 interlace"

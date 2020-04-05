@@ -15,9 +15,8 @@ def bytes_per_pixel(argument):
     return switcher.get(argument, "Not found")
 
 class IDAT(Chunk):
-    def __init__(self, length, data, crc, byte_data, width, height, color_type, palette = None):
-        super().__init__(length, "IDAT", crc, byte_data)
-        self.data = data
+    def __init__(self, raw_bytes, width, height, color_type):
+        super().__init__(raw_bytes)
         self.width = width
         self.height = height
         self.color_type = color_type
@@ -91,4 +90,4 @@ class IDAT(Chunk):
 
     def details(self):
         plt.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width, self.bytes_per_pixel)))
-        plt.show
+        plt.show()

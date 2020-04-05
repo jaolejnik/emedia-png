@@ -24,12 +24,11 @@ def translate_RGB(rgb_tuple):
 
 
 class PLTE(Chunk):
-    def __init__(self, length, data, crc, byte_data, color_type):
-        super().__init__(length, "PLTE", crc, byte_data)
-        self.data = data
-        self.entries = length//3
+    def __init__(self, raw_bytes, color_type=3):
+        super().__init__(raw_bytes)
+        self.entries = self.length//3
         self.required = True if color_type == 3 else False
-        self.palettes = [(data[i], data[i+1], data[i+2]) for i in range(0, self.length, 3)]
+        self.palettes = [(self.data[i], self.data[i+1], self.data[i+2]) for i in range(0, self.length, 3)]
 
     def plot_palettes(self):
         fig, ax = plt.subplots(1, 1)
@@ -44,3 +43,6 @@ class PLTE(Chunk):
 
     def details(self):
         self.basic_info()
+        print("> ENTRIES:", self.entries)
+        print("> REQUIRED:", self.required)
+        print()
