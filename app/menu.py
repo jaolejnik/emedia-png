@@ -59,7 +59,7 @@ class Menu:
 
     def load_file(self):
         # self.pathname = input(" Enter PNG file's pathname:\n  >>")
-        self.pathname = "../png_files/smiley.png"
+        self.pathname = "../png_files/dice.png"
         self.original_file = FilePNG(self.pathname)
         system("clear")
         print("> LOADED FILE: {}.png".format(self.original_file.name))
@@ -98,7 +98,7 @@ class Menu:
         '2': self.original_file.print_chunks,
         '3': chunks_menu,
         '4': self.original_file.print_to_file,
-        'f': self.original_file.perform_fft,
+        '5': self.original_file.perform_fft,
         'b': go_back,
         'q': exit,
         }

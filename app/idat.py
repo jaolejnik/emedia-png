@@ -18,8 +18,11 @@ def bytes_per_pixel(argument):
 
 
 class IDAT(Chunk):
-    def __init__(self, raw_bytes, width, height, color_type):
-        super().__init__(raw_bytes)
+    def __init__(self, init_data, width, height, color_type):
+        if type(init_data) == list:
+            super().__init__(uninit_chunk_list=init_data)
+        else:
+            super().__init__(raw_bytes=init_data)
         self.width = width
         self.height = height
         self.color_type = color_type
