@@ -39,10 +39,11 @@ class PLTE(Chunk):
         ax.set_axis_off()
         fig.tight_layout()
         fig.canvas.set_window_title('Palettes')
-        plt.show()
+        plt.draw()
+        plt.pause(0.001)
 
     def details(self):
         self.basic_info()
         print("> ENTRIES:", self.entries)
         print("> REQUIRED:", self.required)
-        print()
+        self.plot_palettes()

@@ -1,6 +1,6 @@
 from data import FilePNG
 from os import system
-
+from matplotlib import pyplot as plt
 
 
 class Menu:
@@ -12,6 +12,8 @@ class Menu:
 
     def start(self):
         system("clear")
+        plt.ion()
+        plt.show()
         while self.choice != 'q' or self.choice != 'Q':
             self.active_options()
             self.active_menu()
@@ -31,7 +33,8 @@ class Menu:
         print(" [1] - Print file's basic info.")
         print(" [2] - Print file's chunks.")
         print(" [3] - Go to chunks menu (for more details).")
-        print(" [4] - Print data without unimportant chunks to file")
+        print(" [4] - Save as a new file with only critical chunks.")
+        print(" [5] - Perform FFT.")
         print()
         print(" [B] - Go back.")
         print(" [Q] - Quit\n")
@@ -41,6 +44,9 @@ class Menu:
         print("WHAT DO YOU WANT TO DO NEXT?\n")
         for i,chunk in enumerate(self.original_file.chunks.keys(), 1):
             print(" [{}] - {} details.".format(i, chunk))
+        print()
+        if self.original_file.chunks["IHDR"].color_type == 3:
+            print(" [P] - Apply the color palette on IDAT's data.")
         print()
         print(" [B] - Go back.")
         print(" [Q] - Quit\n")
@@ -92,6 +98,7 @@ class Menu:
         '2': self.original_file.print_chunks,
         '3': chunks_menu,
         '4': self.original_file.print_to_file,
+        'f': self.original_file.perform_fft,
         'b': go_back,
         'q': exit,
         }
@@ -105,12 +112,16 @@ class Menu:
             self.active_menu = self.file_menu
             self.active_options = Menu.file_options
 
+        def apply_palette():
+            self.original_file.chunks["IDAT"].apply_palette(self.original_file.chunks["PLTE"].palettes)
         switch = {
         'b': go_back,
         'q': exit,
         }
         for i,chunk in enumerate(self.original_file.chunks.values(), 1):
             switch[str(i)] = chunk.details
+        if self.original_file.chunks["IHDR"].color_type == 3:
+            switch['p'] = apply_palette
         choice = input(">> ").lower()
         system("clear")
         switch.get(choice, Menu.invalid_option)()

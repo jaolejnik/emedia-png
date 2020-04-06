@@ -1,4 +1,7 @@
 import re
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
 
 from const import KILO, MEGA, GIGA, DISPLAY_W, CHUNKS
 from chunks import Chunk
@@ -23,12 +26,13 @@ class FilePNG:
     def __init__(self, pathname):
         self.extension = "PNG"
         self.chunks = {}
+        self.pathname = pathname
         self.get_name(pathname)
         self.load_data(pathname)
         self.find_chunks()
         self.init_chunks()
-        if self.chunks["IHDR"].color_type == 3:
-            self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
+        # if self.chunks["IHDR"].color_type == 3:
+        #     self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
 
     def check_ext(self, pathname):
         if pathname[-3:] != "png":
@@ -111,3 +115,20 @@ class FilePNG:
                 tmp_png.write(self.chunks[chunk_type].raw_bytes)
         print("> Saved the file with only critical chunks to: ", new_name)
         print()
+
+    def perform_fft(self):
+        img = cv2.imread(self.pathname,0)
+        f = np.fft.fft2(img)
+        fshift = np.fft.fftshift(f)
+        magnitude_spectrum = 20*np.log(np.abs(fshift))
+        fig, axs = plt.subplots(1,2)
+        axs[0].imshow(img, cmap = 'gray')
+        axs[0].set_title("INPUT IMAGE")
+        axs[0].set_axis_off()
+        axs[1].imshow(magnitude_spectrum, cmap = 'gray')
+        axs[1].set_title("MAGNITUDE SPECTRUM")
+        axs[1].set_axis_off()
+        fig.canvas.set_window_title('Fourier Transfrom')
+        fig.tight_layout()
+        plt.draw()
+        plt.pause(0.001)

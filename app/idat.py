@@ -1,8 +1,10 @@
-from chunks import Chunk
-from ihdr import IHDR
 import zlib
 import matplotlib.pyplot as plt
 import numpy as np
+
+from chunks import Chunk
+from ihdr import IHDR
+
 
 def bytes_per_pixel(argument):
     switcher = {
@@ -13,6 +15,7 @@ def bytes_per_pixel(argument):
         6: 4,
     }
     return switcher.get(argument, "Not found")
+
 
 class IDAT(Chunk):
     def __init__(self, raw_bytes, width, height, color_type):
@@ -84,10 +87,20 @@ class IDAT(Chunk):
     def apply_palette(self, palette):
         self.reconstructed_data = [pixel for pixel_i in self.reconstructed_data for pixel in palette[pixel_i]]
         self.bytes_per_pixel = 3
+        print("> The palette has been applied!\n")
 
-    def print_info(self):
-        self.basic_info()
+    def display_data(self, plt_ax):
+        if self.bytes_per_pixel == 1:
+            plt_ax.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width)))
+        else:
+            plt_ax.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width, self.bytes_per_pixel)))
 
     def details(self):
-        plt.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width, self.bytes_per_pixel)))
-        plt.show()
+        self.basic_info()
+        fig, ax = plt.subplots(1, 1)
+        self.display_data(ax)
+        ax.set_axis_off()
+        fig.tight_layout()
+        fig.canvas.set_window_title('IDAT data')
+        plt.draw()
+        plt.pause(0.001)
