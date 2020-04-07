@@ -8,6 +8,7 @@ from chunks import Chunk
 from ihdr import IHDR
 from plte import PLTE
 from idat import IDAT
+from trns import TRNS
 
 
 def format_size(size_bytes):
@@ -17,7 +18,7 @@ def format_size(size_bytes):
         bytes = round(size_bytes % KILO, -2)
         return str(kilo) + ',' + str(bytes)[0] + " KB"
     elif size_bytes < GIGA:
-        mega = size_bytes // MEGA
+        mega = size_bytes // MEGAbytes_per_pixel(color_type)
         kilo = round((size_bytes % MEGA) // KILO,-2)
         return str(mega) + ',' + str(kilo)[0] + " MB"
 
@@ -122,6 +123,10 @@ class FilePNG:
                                                    self.chunks["IHDR"].width,
                                                    self.chunks["IHDR"].height,
                                                    self.chunks["IHDR"].color_type)
+            elif chunk_type == "tRNS":
+                self.chunks[chunk_type] = TRNS(self.chunks[chunk_type],
+                                         self.chunks["IHDR"].color_type,
+                                         self.chunks["IHDR"].bit_depth)
             else:
                 if type(self.chunks[chunk_type]) == list:
                     for i in range(len(self.chunks[chunk_type])):

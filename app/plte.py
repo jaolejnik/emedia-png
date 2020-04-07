@@ -1,7 +1,6 @@
 from chunks import Chunk
 import numpy as np
 import matplotlib.pyplot as plt
-import colorsys
 
 
 def init_palette():
@@ -31,12 +30,14 @@ class PLTE(Chunk):
         self.palettes = [(self.data[i], self.data[i+1], self.data[i+2]) for i in range(0, self.length, 3)]
 
     def plot_palettes(self):
+        width = 1
         fig, ax = plt.subplots(1, 1)
-        ax.set_xlim(0, self.entries)
+        ax.set_xlim(0+width/2, self.entries+width/2)
         ax.set_ylim(0, 1)
         for i in range(self.entries):
-            ax.bar(i, 1, width=1, color=translate_RGB(self.palettes[i]))
-        ax.set_axis_off()
+            ax.bar(i+width, 1, width=1, color=translate_RGB(self.palettes[i]))
+        ax.set_xticks([i+1 for i in range(self.entries)])
+        ax.set_yticks([])
         fig.tight_layout()
         fig.canvas.set_window_title('Palettes')
         plt.draw()
@@ -46,4 +47,5 @@ class PLTE(Chunk):
         self.basic_info()
         print("> ENTRIES:", self.entries)
         print("> REQUIRED:", self.required)
+        print()
         self.plot_palettes()

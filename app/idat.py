@@ -6,7 +6,7 @@ from chunks import Chunk
 from ihdr import IHDR
 
 
-def bytes_per_pixel(argument):
+def bytes_per_pixel(color_type):
     switcher = {
         0: 1,
         2: 3,
@@ -14,7 +14,7 @@ def bytes_per_pixel(argument):
         4: 2,
         6: 4,
     }
-    return switcher.get(argument, "Not found")
+    return switcher.get(color_type, "Not found")
 
 
 class IDAT(Chunk):
@@ -87,23 +87,45 @@ class IDAT(Chunk):
         else:
             return 0
 
-    def apply_palette(self, palette):
-        self.reconstructed_data = [pixel for pixel_i in self.reconstructed_data for pixel in palette[pixel_i]]
-        self.bytes_per_pixel = 3
-        print("> The palette has been applied!\n")
-
-    def display_data(self, plt_ax):
-        if self.bytes_per_pixel == 1:
-            plt_ax.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width)))
+    def display_data(self, title, data=None, bytes_per_pixel=None):
+        if data == None: data = self.reconstructed_data
+        fig, ax = plt.subplots(1, 1)
+        if bytes_per_pixel == None: bytes_per_pixel = self.bytes_per_pixel
+        if bytes_per_pixel == 1:
+            ax.imshow(np.array(data).reshape((self.height, self.width)), cmap="gray")
         else:
-            plt_ax.imshow(np.array(self.reconstructed_data).reshape((self.height, self.width, self.bytes_per_pixel)))
+            ax.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
+        ax.set_axis_off()
+        ax.set_facecolor("whitesmoke")
+        fig.patch.set_facecolor("whitesmoke")
+        fig.tight_layout()
+        fig.canvas.set_window_title(title)
+        plt.draw()
+        plt.pause(0.001)
+
+    def apply_palette(self, palette):
+        new_data = [pixel for pixel_i in self.reconstructed_data for pixel in palette[pixel_i]]
+        self.display_data("IDAT + palettes", data=new_data, bytes_per_pixel=3)
+
+    def apply_transparency(self, transparency_data, palette=None):
+        if palette != None:
+            transparent_palette = []
+            for i in range(len(palette)):
+                if i > len(transparency_data)-1:
+                    transparent_palette.append((palette[i][0],
+                                                palette[i][1],
+                                                palette[i][2],
+                                                255))
+                else:
+                    transparent_palette.append((palette[i][0],
+                                                palette[i][1],
+                                                palette[i][2],
+                                                transparency_data[i]))
+            new_data = [pixel for pixel_i in self.reconstructed_data for pixel in transparent_palette[pixel_i]]
+            self.display_data("IDAT + palette + transparency", data=new_data, bytes_per_pixel=4)
+        print("> The palette and transparency has been applied!\n")
+
 
     def details(self):
         self.basic_info()
-        fig, ax = plt.subplots(1, 1)
-        self.display_data(ax)
-        ax.set_axis_off()
-        fig.tight_layout()
-        fig.canvas.set_window_title('IDAT data')
-        plt.draw()
-        plt.pause(0.001)
+        self.display_data("IDAT")
