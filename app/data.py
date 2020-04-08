@@ -8,7 +8,7 @@ from chunks import Chunk
 from ihdr import IHDR
 from plte import PLTE
 from idat import IDAT
-from trns import TRNS
+from ancillary import TRNS, TEXT
 
 
 def format_size(size_bytes):
@@ -125,8 +125,15 @@ class FilePNG:
                                                    self.chunks["IHDR"].color_type)
             elif chunk_type == "tRNS":
                 self.chunks[chunk_type] = TRNS(self.chunks[chunk_type],
-                                         self.chunks["IHDR"].color_type,
-                                         self.chunks["IHDR"].bit_depth)
+                                               self.chunks["IHDR"].color_type,
+                                               self.chunks["IHDR"].bit_depth)
+            elif chunk_type == "tEXt":
+                if type(self.chunks[chunk_type]) == list:
+                    for i in range(len(self.chunks[chunk_type])):
+                        self.chunks[chunk_type][i] = Chunk(self.chunks[chunk_type][i])
+                    self.chunks[chunk_type] = TEXT(self.chunks[chunk_type])
+                else:
+                    self.chunks[chunk_type] = TEXT(self.chunks[chunk_type])
             else:
                 if type(self.chunks[chunk_type]) == list:
                     for i in range(len(self.chunks[chunk_type])):
@@ -144,7 +151,6 @@ class FilePNG:
         tmp_png.write(self.byte_data[:8])
         for chunk_type in self.chunks_indices["CRITICAL"].values():
             for instance_index in chunk_type:
-                print(instance_index)
                 chunk_data = self.get_chunk_data(instance_index)
                 tmp_png.write(chunk_data)
         print("> Saved the file with only critical chunks to: ", new_name)

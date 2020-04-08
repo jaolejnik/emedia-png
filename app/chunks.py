@@ -26,9 +26,9 @@ class Chunk:
         self.crc = raw_bytes[i:i+4]
 
     def multiple_chunk_init(self, uninit_chunk_list):
-        self.length = sum([chunk.length for chunk in uninit_chunk_list])
+        self.length = [chunk.length for chunk in uninit_chunk_list]
         self.type = uninit_chunk_list[0].type
-        self.data = b"".join([chunk.data for chunk in uninit_chunk_list])
+        self.data = [chunk.data for chunk in uninit_chunk_list]
         self.crc = [chunk.crc for chunk in uninit_chunk_list]
 
     def basic_info(self):

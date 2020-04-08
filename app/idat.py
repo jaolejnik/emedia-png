@@ -23,6 +23,9 @@ class IDAT(Chunk):
             super().__init__(uninit_chunk_list=init_data)
         else:
             super().__init__(raw_bytes=init_data)
+        if type(self.data) == list:
+            self.length = sum(self.length)
+            self.data = b"".join(self.data)
         self.width = width
         self.height = height
         self.color_type = color_type
