@@ -1,7 +1,6 @@
 from chunks import Chunk
 from const import DISPLAY_W
 
-
 def filter_method(argument):
     switcher = {
         0: "None",

@@ -8,7 +8,7 @@ from chunks import Chunk
 from ihdr import IHDR
 from plte import PLTE
 from idat import IDAT
-from ancillary import TRNS, TEXT
+from ancillary import TRNS, TEXT, GAMA, CHRM, SRGB, TIME
 
 
 def format_size(size_bytes):
@@ -134,6 +134,20 @@ class FilePNG:
                     self.chunks[chunk_type] = TEXT(self.chunks[chunk_type])
                 else:
                     self.chunks[chunk_type] = TEXT(self.chunks[chunk_type])
+
+            elif chunk_type == "gAMA":
+                self.chunks[chunk_type] = GAMA(self.chunks[chunk_type])
+
+            elif chunk_type == "cHRM":
+                self.chunks[chunk_type] = CHRM(self.chunks[chunk_type])
+
+            # only for pokemon.png
+            elif chunk_type == "sRGB":
+                self.chunks[chunk_type] = SRGB(self.chunks[chunk_type])
+
+            elif chunk_type == "tIME":
+                self.chunks[chunk_type] = TIME(self.chunks[chunk_type])
+
             else:
                 if type(self.chunks[chunk_type]) == list:
                     for i in range(len(self.chunks[chunk_type])):
