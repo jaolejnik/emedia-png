@@ -7,15 +7,25 @@ from data import FilePNG
 
 
 class Menu:
+    '''
+    Represents simple menu made with C-like switch cases.
+    '''
     def __init__(self):
         self.choice = None
         self.active_menu = self.main_menu
         self.active_options = self.main_options
 
     def set_file_list(self, dir_path):
+        '''
+        Gets list of defualt files that are store in png_files dir.
+        '''
         self.defualt_files = glob(dir_path+"*.png")
 
     def start(self):
+        '''
+        Statrs the loop that's responsible for keeping the program running and
+        input handling.
+        '''
         system("clear")
         plt.ion()
         plt.show()
@@ -26,6 +36,9 @@ class Menu:
 
 
     def main_options(self):
+        '''
+        Displays possible options for the main menu.
+        '''
         print("WHAT DO YOU WANT TO DO NEXT?\n")
         for i,file in enumerate(self.defualt_files, 1):
             name = re.findall('\w+.png', file)[0]
@@ -38,6 +51,9 @@ class Menu:
 
     @staticmethod
     def file_options():
+        '''
+        Displays possible options for the file menu.
+        '''
         print("WHAT DO YOU WANT TO DO NEXT?\n")
         print(" [1] - Print file's basic info.")
         print(" [2] - Print file's chunks.")
@@ -50,6 +66,9 @@ class Menu:
 
 
     def chunks_options(self):
+        '''
+        Displays possible options for the chunks menu.
+        '''
         print("WHAT DO YOU WANT TO DO NEXT?\n")
         for i,chunk in enumerate(self.original_file.chunks.keys(), 1):
             print(" [{}] - {} details.".format(i, chunk))
@@ -65,10 +84,17 @@ class Menu:
 
     @staticmethod
     def invalid_option(*args):
+        '''
+        *args is there only if choice in a menu needs to be called with an
+        argument.
+        '''
         print("Invalid option! Try again.")
 
 
     def load_file(self, pathname=None):
+        '''
+        Loads the file with the given pathname.
+        '''
         if pathname == None:
             self.pathname = input(" Enter PNG file's pathname:\n  >>")
         else: self.pathname = pathname
@@ -79,6 +105,9 @@ class Menu:
 
 
     def main_menu(self):
+        '''
+        Handles choice for the main menu.
+        '''
         def file_loading(choice):
             if choice == 'f': self.load_file()
             else: self.load_file(self.defualt_files[int(choice)-1])
@@ -97,6 +126,9 @@ class Menu:
 
 
     def file_menu(self):
+        '''
+        Handles choice for the file menu.
+        '''
         assert self.original_file != None, "A file should be loaded first!"
 
         def go_back():
@@ -123,6 +155,9 @@ class Menu:
 
 
     def chunks_menu(self):
+        '''
+        Handles choice for the chunks menu.
+        '''
         def go_back():
             self.active_menu = self.file_menu
             self.active_options = Menu.file_options

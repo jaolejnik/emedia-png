@@ -3,19 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def init_palette():
-    palette = {"Red": {}, "Green": {}, "Blue": {}}
-    for color in palette.keys():
-        for i in range(256):
-            palette[color][i] = 0
-    return palette
-
 def translate(value, from_min, from_max, to_min, to_max):
+    '''
+    Translates value from range A to range B.
+    '''
     num = (value - from_min) * (to_max - to_min)
     den = from_max - from_min
     return to_min + num/den
 
 def translate_RGB(rgb_tuple):
+    '''
+    Translates RGB tuple from 0-255 range to 0-1 to make it pyplot friendly.
+    '''
     translated_red = translate(rgb_tuple[0], 0, 255, 0, 1)
     translated_green = translate(rgb_tuple[1], 0, 255, 0, 1)
     translated_blue = translate(rgb_tuple[2], 0, 255, 0, 1)
@@ -23,6 +22,14 @@ def translate_RGB(rgb_tuple):
 
 
 class PLTE(Chunk):
+    '''
+    Represents a PLTE critical chunk. Derivative of Chunk class.
+
+    Fields:
+        - entries
+        - required
+        - palettes
+    '''
     def __init__(self, raw_bytes, color_type=3):
         super().__init__(raw_bytes)
         self.entries = self.length//3
@@ -30,6 +37,9 @@ class PLTE(Chunk):
         self.palettes = [(self.data[i], self.data[i+1], self.data[i+2]) for i in range(0, self.length, 3)]
 
     def plot_palettes(self):
+        '''
+        Displays the palette in a new matplotlib window as a bar plot.
+        '''
         width = 1
         fig, ax = plt.subplots(1, 1)
         ax.set_xlim(0+width/2, self.entries+width/2)
@@ -44,6 +54,9 @@ class PLTE(Chunk):
         plt.pause(0.001)
 
     def details(self):
+        '''
+        Prints chunk's details into stdout.
+        '''
         self.basic_info()
         print("> ENTRIES:", self.entries)
         print("> REQUIRED:", self.required)

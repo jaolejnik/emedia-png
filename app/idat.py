@@ -18,6 +18,10 @@ def bytes_per_pixel(color_type):
 
 
 class IDAT(Chunk):
+    '''
+    IDAT contains encoded and filtered actual image data.
+    To get back raw pixel data we should reverse this process.
+    '''
     def __init__(self, init_data, width, height, color_type):
         if type(init_data) == list:
             super().__init__(uninit_chunk_list=init_data)
@@ -33,6 +37,11 @@ class IDAT(Chunk):
         self.analyse()
 
     def analyse(self):
+        '''
+        At first pixel data are decompressed with zlib's module, then each
+        scanline prefixed with a byte indicating which filter type was used to
+        filter is unfiltered with correct filter type.
+        '''
         self.data = zlib.decompress(self.data)
         self.reconstructed_data = []
         stride = self.width * self.bytes_per_pixel
@@ -60,6 +69,10 @@ class IDAT(Chunk):
                 self.reconstructed_data.append(recon_x & 0xff) #truncation to byte
 
     def paeth_predictor(self, a, b, c):
+        '''
+        Method to filter pixel data specified with filter type
+        number 4 - Paeth.
+        '''
         p = a + b - c
         pa = abs(p - a)
         pb = abs(p - b)
@@ -130,5 +143,8 @@ class IDAT(Chunk):
 
 
     def details(self):
+        '''
+        Prints chunk's details into stdout.
+        '''
         self.basic_info()
         self.display_data("IDAT")

@@ -2,6 +2,10 @@ from chunks import Chunk
 from const import DISPLAY_W
 
 def filter_method(argument):
+    '''
+    Method for parametrization filter methods that can reach in IHDR chunk
+    The argument of this method is 1 byte located in IHDR chunk.
+    '''
     switcher = {
         0: "None",
         1: "Sub",
@@ -13,11 +17,19 @@ def filter_method(argument):
 
 
 class IHDR(Chunk):
+    '''
+    IHDR chunk contains important informations about image such as
+    width, height, bitdepth, colortype compression Method, filter method,
+    interlace method.
+    '''
     def __init__(self, raw_bytes):
         super().__init__(raw_bytes)
         self.analyse()
 
     def details(self):
+        '''
+        Prints chunk's details into stdout.
+        '''
         self.basic_info()
         print(" ", end="")
         print(" HEADER DATA ".center(DISPLAY_W-2, "-"))
@@ -31,6 +43,9 @@ class IHDR(Chunk):
         print()
 
     def analyse(self):
+        '''
+        Method for analysing bytes contained in IHDR Chunk byte-for-byte.
+        '''
         if self.length != 13:
             print(self.length)
             raise Exception("IHDR chunk's length is invalid")

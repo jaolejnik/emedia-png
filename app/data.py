@@ -12,18 +12,33 @@ from ancillary import TRNS, TEXT, GAMA, CHRM, SRGB, TIME
 
 
 def format_size(size_bytes):
+    '''
+    Takes size in bytes (int) as input ad returns formatted string (B, KB, MB).
+    '''
     if size_bytes < KILO: return str(size_bytes) + " B"
     elif size_bytes < MEGA:
         kilo = size_bytes // KILO
         bytes = round(size_bytes % KILO, -2)
         return str(kilo) + ',' + str(bytes)[0] + " KB"
     elif size_bytes < GIGA:
-        mega = size_bytes // MEGAbytes_per_pixel(color_type)
+        mega = size_bytes // MEGA
         kilo = round((size_bytes % MEGA) // KILO,-2)
         return str(mega) + ',' + str(kilo)[0] + " MB"
 
 
 class FilePNG:
+    '''
+    This class is responsible for representation of a PNG file.
+
+    Fields:
+        - extension
+        - pathname
+        - name
+        - size
+        - byte_data
+        - chunks
+        - chunks_indices
+    '''
     def __init__(self, pathname):
         self.extension = "PNG"
         self.chunks = {}
@@ -34,22 +49,35 @@ class FilePNG:
         self.init_chunks()
 
     def check_ext(self, pathname):
+        '''
+        Checks if extension of input file is PNG. If it's not an Exception is
+        raised.
+        '''
         if pathname[-3:] != "png":
             raise Exception("INCORRECT FILE FORMAT!\nThis program is strictly for analyzing PNG files.")
 
     def get_name(self, pathname):
+        '''
+        Gets the name of the file from the given pathname.
+        '''
         pathname = pathname.lower()
         self.check_ext(pathname)
         fullname = re.findall('\w+.png', pathname)[0]
         self.name = fullname[:-4]
 
     def load_data(self, pathname):
+        '''
+        Loads data from the input file.
+        '''
         png_file = open(pathname, "rb")
         self.byte_data = png_file.read()
         self.size = len(self.byte_data)
         png_file.close()
 
     def print_info(self):
+        '''
+        Prints file's info into a screen.
+        '''
         print(" BASIC FILE INFO ".center(DISPLAY_W, "="))
         print()
         print("> NAME:", self.name)
@@ -64,6 +92,10 @@ class FilePNG:
         print()
 
     def find_chunks(self):
+        '''
+        Finds chunks in byte_data, stores them in an dictionary and then
+        returns it.
+        '''
         found_chunks = {"CRITICAL": {}, "ANCILLARY": {}}
         i = 0
         while self.byte_data[i:i+1]:
@@ -86,6 +118,9 @@ class FilePNG:
         self.chunks_indices = found_chunks
 
     def get_chunk_data(self, index):
+        '''
+        Gets chunks data as a slice of self.byte_data.
+        '''
         start = index
         length = int.from_bytes(self.byte_data[start:start+4], "big")
         end = index + length + 12
@@ -93,6 +128,9 @@ class FilePNG:
 
 
     def get_chunks(self):
+        '''
+        Stores chunks slices from self.byte_data in self.chunks dictionary.
+        '''
         for chunks_dict in self.chunks_indices.values():
             for chunk_type in chunks_dict.keys():
                 for instance_index in chunks_dict[chunk_type]:
@@ -104,6 +142,9 @@ class FilePNG:
                         self.chunks[chunk_type] = self.get_chunk_data(instance_index)
 
     def init_chunks(self):
+        '''
+        Inits self.chunks with the data stored in it.
+        '''
         self.get_chunks() # init self.chunks with raw_bytes
         for chunk_type in self.chunks.keys(): # this loop inits chunks
             if chunk_type == "IHDR":
@@ -157,9 +198,15 @@ class FilePNG:
                     self.chunks[chunk_type] = Chunk(self.chunks[chunk_type])
 
     def print_chunks(self):
+        '''
+        Prints every chunk's basic info.
+        '''
         for chunk in self.chunks.values(): chunk.basic_info()
 
     def print_to_file(self):
+        '''
+        Saves the file as a PNG file with only critical chunks.
+        '''
         new_name = "../png_files/{}_crit.png".format(self.name)
         tmp_png = open(new_name, "wb")
         tmp_png.write(self.byte_data[:8])
@@ -171,6 +218,9 @@ class FilePNG:
         print()
 
     def perform_fft(self):
+        '''
+        Preforms FFT on the file using OpenCV.
+        '''
         img = cv2.imread(self.pathname,0)
         f = np.fft.fft2(img)
         fshift = np.fft.fftshift(f)
