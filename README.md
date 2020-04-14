@@ -23,7 +23,7 @@ The goal was to create a simple program to parse a **PNG** file byte by byte and
 - tIME \
 ... and more to come (*or maybe not*).
 
-## Dependecies
+## Dependencies
 - Python 3.6 or higher
 - [NumPy](https://numpy.org/)
 - [Matplotlib](https://matplotlib.org/)
