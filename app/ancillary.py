@@ -104,7 +104,7 @@ class GAMA(Chunk):
 
 
 class CHRM(Chunk):
-     '''
+    '''
     cHRM Chunk specify x,y chromaticities of red, green and blue primaries used
     in the image and the referenced white points.
     '''
@@ -113,7 +113,7 @@ class CHRM(Chunk):
         self.analyse()
 
     def analyse(self):
-         '''
+        '''
         Each of these parametres is written in 4 bytes.
         '''
         self.chrm_values = { "white_point_x" : None,
@@ -169,7 +169,7 @@ class SRGB(Chunk):
 
 
 class TIME(Chunk):
-     '''
+    '''
     The tIme Chunk gives the time of the last modification image in format
     Year-Month-Day | Hour-Minute-Second
     '''
