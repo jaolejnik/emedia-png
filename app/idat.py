@@ -117,6 +117,7 @@ class IDAT(Chunk):
         fig.tight_layout()
         fig.canvas.set_window_title(title)
         plt.draw()
+        plt.show()
         plt.pause(0.001)
 
     def apply_palette(self, palette):
