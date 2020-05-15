@@ -16,7 +16,7 @@ class RSA():
         public and private keys
         for rsa algorithm
         '''
-
+        print("Generating keys...")
         self.public_key = []
         p, q = generate_pq()
         n = p * q
@@ -26,8 +26,10 @@ class RSA():
             if greatest_common_divisor(e, phi) == 1:
                 break
         self.public_key.append(e)
+        print("Successfully generated public key")
         d =  mod_inverse(e, phi)
         self.private_key = int(d)
+        print("Successfully generated private key")
 
     def encryption(self, idat_chunk):
         '''
@@ -37,7 +39,7 @@ class RSA():
 
         encypted_data = []
         for data in idat_chunk.reconstructed_data:
-            encypted_data.append((data ** self.public_key[1]) % self.public_key[0])
+            encypted_data.append(pow(data, self.public_key[1], self.public_key[0]))
         return encypted_data
 
 
@@ -49,5 +51,5 @@ class RSA():
 
         decrypted_data = []
         for data in encrypted_data:
-            decrypted_data.append((data ** self.private_key) % self.public_key[0])
+            decrypted_data.append(pow(data, self.private_key, self.public_key[0]))
         return decrypted_data
