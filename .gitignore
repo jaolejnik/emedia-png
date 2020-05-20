@@ -1,5 +1,6 @@
 # Others
 others/
+app/brudnopis.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

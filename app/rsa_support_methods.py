@@ -6,35 +6,10 @@ def greatest_common_divisor(a, b):
     two integers by using
     Euclidean algorithm
     '''
-    print("Finding grreatest common divisior for {} and {}...".format(a, b))
     if b == 0:
         return a
     else:
         return greatest_common_divisor(b, a % b)
-
-def moduloMultiplication(a, b, mod):
-    res = 0
-    a = a % mod
-    while (b):
-        if (b & 1):
-            res = (res + a) % mod
-        a = (2 * a) % mod
-        b >>= 1
-    return res
-
-def mod_inverse2(a, m):
-    '''
-    method to get a modular
-    multiplicative inverse of
-    integer a respect to the
-    modules of m
-    '''
-    print("modinverse...")
-    a = a % m;
-    for x in range(1, m) :
-        if (moduloMultiplication(a, x, m) == 1) :
-            return x
-    return 1
 
 def egcd(a, b):
     if a == 0:
@@ -52,8 +27,7 @@ def mod_inverse(a, m):
 
 def check_prime_number(number):
     '''
-    method to check
-    if number is primed
+    method to check if number is prime
     '''
     if number > 1:
         for i in range(2, number):
@@ -70,9 +44,8 @@ def is_prime(p, n):
     n - amount of iterations
     '''
     assert type(p) == int, "P should be int."
-    assert p > 2, "P should be grater than 2"
+    assert p > 2, "P should be greater than 2"
 
-    print("checking if number is prime (Millen-Rabin)...")
     d = p - 1
     s = 0
 
@@ -93,28 +66,26 @@ def is_prime(p, n):
 
     return True
 
-def generate_prime_number():
+def generate_prime_number(bit_size):
     '''
     method to generate
     prime number
     '''
     print("Generating prime number...")
     while True:
-        tmp = random.getrandbits(64)
-        # if check_prime_number(tmp) == True:
+        tmp = random.getrandbits(bit_size)
         if is_prime(tmp, 10):
             prime_number = tmp
             break
     return prime_number
 
-def generate_pq():
+def generate_pq(key_size):
     '''
     method to generate different
     values of p and q
     '''
-    print("generating p and q")
-    p = generate_prime_number()
-    q = generate_prime_number()
+    p = generate_prime_number(key_size//2)
+    q = generate_prime_number(key_size//2)
     while p == q:
-        q = generate_prime_number()
+        q = generate_prime_number(key_size//2)
     return p, q
