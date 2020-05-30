@@ -80,3 +80,62 @@ class RSA():
             for byte in decrypted_bytes:
                 decrypted_data.append(byte)
         return decrypted_data
+
+
+    def encryption_cbc(self, data_to_encrypt):
+        '''
+        method to encrypt data without
+        header from png file
+        '''
+        print("Encrypting...")
+        encrypted_data = []
+        step = self.key_size // 8 - 1 # convert to bytes
+        self.cbc_vector = random.getrandbits(self.key_size)
+        prev_xor = self.cbc_vector
+        for i in range(0, len(data_to_encrypt), step):
+            raw_bytes = bytearray(data_to_encrypt[i:i+step])
+            input_length = len(raw_bytes)
+            int_from_bytes = int.from_bytes(raw_bytes, 'big')
+            assert int_from_bytes < self.public_key[0], "M bigger that n"
+            prev_xor = prev_xor.to_bytes(step+1, 'big')
+            prev_xor = int.from_bytes(prev_xor[:input_length], 'big')
+            xored_int = int_from_bytes ^ prev_xor
+            encrypted_int = pow(xored_int, self.public_key[1], self.public_key[0])
+            prev_xor = encrypted_int
+            encrypted_bytes = encrypted_int.to_bytes(step+1, 'big')
+            encrypted_length = len(encrypted_bytes)
+            for j in range(0, input_length):
+                if j < input_length-1:
+                    encrypted_data.append(encrypted_bytes[j])
+                else:
+                    encrypted_data.append(int.from_bytes(encrypted_bytes[j:], 'big'))
+        return encrypted_data
+
+
+    def decryption_cbc(self, encrypted_data):
+        '''
+        method to decrypt encypted
+        png file
+        '''
+        print("Decrypting...")
+        decrypted_data = []
+        step = self.key_size // 8 - 1 # convert to bytes
+        prev_xor = self.cbc_vector
+        for i in range(0, len(encrypted_data), step):
+            slice = encrypted_data[i:i+step]
+            encrypted_bytes = b''
+            for j in range(0, len(slice)):
+                if j < len(slice)-1:
+                    encrypted_bytes += slice[j].to_bytes(1, 'big')
+                else:
+                    encrypted_bytes += slice[j].to_bytes(step-len(slice)+2, 'big')
+            int_from_bytes = int.from_bytes(encrypted_bytes, 'big')
+            decrypted_int=pow(int_from_bytes, self.private_key, self.public_key[0])
+            prev_xor = prev_xor.to_bytes(step+1, 'big')
+            prev_xor = int.from_bytes(prev_xor[:len(slice)], 'big')
+            xored_int = prev_xor ^ decrypted_int
+            decrypted_bytes = xored_int.to_bytes(len(slice), 'big')
+            prev_xor = int_from_bytes
+            for byte in decrypted_bytes:
+                decrypted_data.append(byte)
+        return decrypted_data
