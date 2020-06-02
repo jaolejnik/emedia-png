@@ -1,6 +1,8 @@
 from idat import IDAT
-from rsa_support_methods import *
+from numpy import double
+from support_methods import *
 from decimal import Decimal
+import rsa
 
 class RSA():
     '''
@@ -10,6 +12,7 @@ class RSA():
     def __init__(self, m, key_size=1024):
         self.key_size = key_size
         self.keys_generator(m)
+        (self.pubkey, self.privkey) = rsa.newkeys(128)
 
     def keys_generator(self, m):
         '''
@@ -57,7 +60,6 @@ class RSA():
                     encrypted_data.append(int.from_bytes(encrypted_bytes[j:], 'big'))
         return encrypted_data
 
-
     def decryption(self, encrypted_data):
         '''
         method to decrypt encypted
@@ -75,8 +77,46 @@ class RSA():
                 else:
                     encrypted_bytes += slice[j].to_bytes(step-len(slice)+2, 'big')
             int_from_bytes = int.from_bytes(encrypted_bytes, 'big')
-            decrypted_int=pow(int_from_bytes, self.private_key, self.public_key[0])
+            decrypted_int = pow(int_from_bytes, self.private_key, self.public_key[0])
             decrypted_bytes = decrypted_int.to_bytes(len(slice), 'big')
             for byte in decrypted_bytes:
                 decrypted_data.append(byte)
         return decrypted_data
+
+    def encryption_with_ready_solution(self, data_to_encrypt):
+        '''
+        Method to enrypt data with
+        ready python library
+        '''
+        print("Encrypting...")
+        encrypted_data = []
+        self.encrypted_rsa_bytes = []
+        for data in data_to_encrypt:
+            self.encrypted_rsa_bytes.append(rsa.encrypt(data.to_bytes(2, 'big'), self.pubkey))
+            encrypted_data.append((float)(int.from_bytes(rsa.encrypt(data.to_bytes(2, 'big'), self.pubkey), 'big')))
+        return encrypted_data
+
+    def decryption_with_ready_solution(self, encrypted_data):
+        '''
+        Method to decrypt data
+        with ready python library
+        '''
+        print("Decrypting...")
+        decrypted_data = []
+        for data in self.encrypted_rsa_bytes:
+            decrypted_data.append(int.from_bytes(rsa.decrypt(data, self.privkey), 'big'))
+        return decrypted_data
+
+    def check_if_encryption_correct(self, data):
+        '''
+        Method to check
+        if encrypting with
+        ready solution is correct
+        '''
+        print("checking...")
+        encrypted_data = self.encryption_with_ready_solution(data)
+        decrypted_data = self.decryption_with_ready_solution(encrypted_data)
+        for i in range(0, len(decrypted_data)):
+            if data[i] != decrypted_data[i]:
+                return False
+        return True

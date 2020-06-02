@@ -42,6 +42,7 @@ class IDAT(Chunk):
         scanline prefixed with a byte indicating which filter type was used to
         filter is unfiltered with correct filter type.
         '''
+        self.compressed_data = bytearray(self.data)
         self.data = zlib.decompress(self.data)
         self.reconstructed_data = []
         stride = self.width * self.bytes_per_pixel
