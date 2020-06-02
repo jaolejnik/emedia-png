@@ -83,7 +83,6 @@ class RSA():
                 decrypted_data.append(byte)
         return decrypted_data
 
-<<<<<<< HEAD:app/own_rsa.py
     def encryption_with_ready_solution(self, data_to_encrypt):
         '''
         Method to enrypt data with
@@ -121,7 +120,6 @@ class RSA():
             if data[i] != decrypted_data[i]:
                 return False
         return True
-=======
 
     def encryption_cbc(self, data_to_encrypt):
         '''
@@ -180,4 +178,3 @@ class RSA():
             for byte in decrypted_bytes:
                 decrypted_data.append(byte)
         return decrypted_data
->>>>>>> 28f8142754e7db26541541f2d86ec98f40651d07:app/rsa.py
