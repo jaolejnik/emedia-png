@@ -12,7 +12,7 @@ class RSA():
     def __init__(self, m, key_size=1024):
         self.key_size = key_size
         self.keys_generator(m)
-        (self.pubkey, self.privkey) = rsa.newkeys(128)
+        [self.pubkey, self.privkey] = rsa.newkeys(key_size)
 
     def keys_generator(self, m):
         '''
@@ -83,43 +83,50 @@ class RSA():
                 decrypted_data.append(byte)
         return decrypted_data
 
-    def encryption_with_ready_solution(self, data_to_encrypt):
+    def encryption_with_ready_solution(self, data_to_encrypt, key):
         '''
         Method to enrypt data with
         ready python library
         '''
         print("Encrypting...")
         encrypted_data = []
-        self.encrypted_rsa_bytes = []
-        for data in data_to_encrypt:
-            self.encrypted_rsa_bytes.append(rsa.encrypt(data.to_bytes(2, 'big'), self.pubkey))
-            encrypted_data.append((float)(int.from_bytes(rsa.encrypt(data.to_bytes(2, 'big'), self.pubkey), 'big')))
+        step = self.key_size // 8 - 11 # convert to bytes
+        for i in range(0, len(data_to_encrypt), step):
+            raw_bytes = bytearray(data_to_encrypt[i:i+step])
+            input_length = len(raw_bytes)
+            encrypted_bytes = rsa.encrypt(raw_bytes, key)
+            encrypted_length = len(encrypted_bytes)
+            for j in range(0, input_length):
+                if j < input_length-1:
+                    encrypted_data.append(encrypted_bytes[j])
+                else:
+                    encrypted_data.append(int.from_bytes(encrypted_bytes[j:], 'big'))
         return encrypted_data
 
-    def decryption_with_ready_solution(self, encrypted_data):
-        '''
-        Method to decrypt data
-        with ready python library
-        '''
-        print("Decrypting...")
-        decrypted_data = []
-        for data in self.encrypted_rsa_bytes:
-            decrypted_data.append(int.from_bytes(rsa.decrypt(data, self.privkey), 'big'))
-        return decrypted_data
+    # def decryption_with_ready_solution(self, encrypted_data):
+    #     '''
+    #     Method to decrypt data
+    #     with ready python library
+    #     '''
+    #     print("Decrypting...")
+    #     decrypted_data = []
+    #     for data in self.encrypted_rsa_bytes:
+    #         decrypted_data.append(int.from_bytes(rsa.decrypt(data, self.privkey), 'big'))
+    #     return decrypted_data
 
-    def check_if_encryption_correct(self, data):
-        '''
-        Method to check
-        if encrypting with
-        ready solution is correct
-        '''
-        print("checking...")
-        encrypted_data = self.encryption_with_ready_solution(data)
-        decrypted_data = self.decryption_with_ready_solution(encrypted_data)
-        for i in range(0, len(decrypted_data)):
-            if data[i] != decrypted_data[i]:
-                return False
-        return True
+    # def check_if_encryption_correct(self, data):
+    #     '''
+    #     Method to check
+    #     if encrypting with
+    #     ready solution is correct
+    #     '''
+    #     print("checking...")
+    #     encrypted_data = self.encryption_with_ready_solution(data)
+    #     decrypted_data = self.decryption_with_ready_solution(encrypted_data)
+    #     for i in range(0, len(decrypted_data)):
+    #         if data[i] != decrypted_data[i]:
+    #             return False
+    #     return True
 
     def encryption_cbc(self, data_to_encrypt):
         '''

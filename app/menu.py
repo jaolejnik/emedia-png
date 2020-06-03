@@ -3,7 +3,7 @@ from glob import glob
 from os import system
 from matplotlib import pyplot as plt
 from data import FilePNG
-from rsa import RSA
+from own_rsa import RSA
 
 class Menu:
     '''
@@ -76,6 +76,8 @@ class Menu:
         print()
         print(" [3] - Encrypt (selfmade, CBC)")
         print(" [4] - Decrypt (selfmade, CBC)")
+        print()
+        print(" [5] - Compare (selfmade vs library)")
         print()
         print(" [B] - Go back.")
         print(" [Q] - Quit\n")
@@ -252,6 +254,29 @@ class Menu:
             decrypted_data = self.rsa.decryption_cbc(encrypted_data)
             self.original_file.chunks['IDAT'].display_data("DECRYPTED CBC", data=decrypted_data)
 
+        def compare():
+            global encrypted_data
+            system("clear")
+            print("Specify key size:")
+            key_size = int(input(">> ").lower())
+            data = self.original_file.chunks['IDAT'].reconstructed_data
+            step = key_size // 8 - 1
+            data = [data[i:i+step] for i in range(0, len(data), step)]
+            data = [bytearray(slice) for slice in data]
+            data_sizes = [int.from_bytes(slice, 'big') for slice in data]
+            self.rsa = RSA(max(data_sizes), key_size)
+            self.rsa.public_key[0] = self.rsa.pubkey.n
+            self.rsa.public_key[1] = self.rsa.pubkey.e
+            print(self.rsa.public_key)
+            print(self.rsa.pubkey)
+
+            self.original_file.chunks['IDAT'].display_data("ORIGINAL")
+            encrypted_data = self.rsa.encryption(self.original_file.chunks['IDAT'].reconstructed_data)
+            self.original_file.chunks['IDAT'].display_data("ENCRYPTED SELFMADE", data=encrypted_data)
+            print()
+            encrypted_data = self.rsa.encryption_with_ready_solution(self.original_file.chunks['IDAT'].reconstructed_data, self.rsa.pubkey)
+            self.original_file.chunks['IDAT'].display_data("ENCRYPTED LIBRARY", data=[float(x) for x in encrypted_data])
+
         def go_back():
             self.active_menu = self.file_menu
             self.active_options = Menu.file_options
@@ -262,6 +287,7 @@ class Menu:
         '2': decrypt,
         '3': encrypt_cbc,
         '4': decrypt_cbc,
+        '5': compare,
         'b': go_back,
         'q': exit,
         }
